@@ -1,0 +1,9 @@
+[package]
+name = "ld"
+version = "0.1.0"
+edition = "2024"
+description = "List files and directories in a directory"
+
+[dependencies]
+clap = { version = "4.5.38", features = ["derive"] }
+derive_builder = { version = "0.20.2"}

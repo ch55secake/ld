@@ -1,0 +1,6 @@
+/target
+
+.idea
+
+# remove the macos slop
+.DS_Store
