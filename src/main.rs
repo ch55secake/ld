@@ -1,12 +1,12 @@
 mod args;
 
-use clap::Parser;
 use args::Args;
+use clap::Parser;
 
 fn main() {
-   let args = Args::parse(); 
-    
-    if !args.directory.eq(".") { 
+    let args = Args::parse();
+
+    if !args.directory.eq(".") {
         println!("Searching through: {}", args.directory);
     }
 }
