@@ -2,16 +2,16 @@ use derive_builder::Builder;
 use std::fs;
 
 #[derive(Builder, Debug)]
-pub(crate) struct DirectoryItem {
+pub struct DirectoryItem {
     /// Name of the item within the directory
-    name: String,
+    pub name: String,
 
     // Type of the item within the directory
-    is_dir: bool,
+    pub is_dir: bool,
 }
 
 /// Find items within a directory and return back a vector with the directory items.
-pub(crate) fn read_find_directory_items(directory: &std::path::Path) -> Vec<DirectoryItem> {
+pub fn find_directory_items(directory: &std::path::Path) -> Vec<DirectoryItem> {
     let entries = fs::read_dir(directory).unwrap();
 
     let mut items: Vec<DirectoryItem> = vec![];
@@ -26,4 +26,9 @@ pub(crate) fn read_find_directory_items(directory: &std::path::Path) -> Vec<Dire
     });
 
     items
+}
+
+/// Convert a string to a path object
+pub fn path_to_str(path: &String) -> &std::path::Path {
+    std::path::Path::new(path)
 }

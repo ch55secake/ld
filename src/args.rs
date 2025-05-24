@@ -7,8 +7,7 @@ pub(crate) struct Args {
     #[clap(default_value = ".")]
     pub(crate) directory: String,
 
-    /// Verbose
-    #[clap(short, long)]
-    #[clap(default_value = "false")]
-    verbose: bool,
+    /// Show file permissions
+    #[clap(short, long, default_value = "false")]
+    pub(crate) permissions: bool,
 }
