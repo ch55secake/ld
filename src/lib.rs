@@ -1,6 +1,8 @@
+use chrono::{DateTime, Local, NaiveDate};
 use derive_builder::Builder;
 use std::ffi::OsString;
 use std::os::unix::fs::PermissionsExt;
+use std::time::SystemTime;
 use std::{fs, path};
 
 #[derive(Builder, Debug, PartialEq)]
@@ -16,6 +18,9 @@ pub struct DirectoryItem {
 
     /// File permissions represented as a num
     pub file_permissions: String,
+
+    /// Time when file was created
+    pub created_at: SystemTime,
 }
 
 /// Find items within a directory and return back a vector with the directory items.
@@ -30,12 +35,14 @@ pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
             let is_dir = entry.file_type().ok()?.is_dir();
             let is_hidden = is_file_hidden(entry.file_name());
             let file_permissions = entry.metadata().ok()?.permissions().mode();
+            let created_at = entry.metadata().ok()?.created().ok()?;
 
             DirectoryItemBuilder::default()
                 .name(name)
                 .is_dir(is_dir)
                 .is_hidden(is_hidden)
                 .file_permissions(mode_to_rwx(file_permissions))
+                .created_at(created_at)
                 .build()
                 .ok()
         })
@@ -73,6 +80,12 @@ fn mode_to_rwx(mode: u32) -> String {
     perms
 }
 
+/// Convert system time into a local date
+pub fn system_time_to_local_date(system_time: SystemTime) -> NaiveDate {
+    let datetime: DateTime<Local> = system_time.into();
+    datetime.date_naive() // Returns NaiveDate
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{DirectoryItem, find_directory_items, mode_to_rwx};
@@ -80,6 +93,7 @@ mod tests {
     use assert_fs::prelude::*;
     use std::fs;
     use std::os::unix::fs::PermissionsExt;
+    use std::time::SystemTime;
 
     #[test]
     fn test_find_directory_items_with_static_dir() {
@@ -110,12 +124,14 @@ mod tests {
                 is_dir: false,
                 is_hidden: false,
                 file_permissions: mode_to_rwx(file_mode),
+                created_at: SystemTime::now(),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
                 file_permissions: mode_to_rwx(dir_mode),
+                created_at: SystemTime::now(),
             },
         ];
 
@@ -145,6 +161,7 @@ mod tests {
             is_dir: false,
             is_hidden: true,
             file_permissions: mode_to_rwx(file_mode),
+            created_at: SystemTime::now(),
         }];
 
         assert_eq!(items, expected);

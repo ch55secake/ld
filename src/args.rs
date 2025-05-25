@@ -11,10 +11,10 @@ pub(crate) struct Args {
     pub(crate) directory: String,
 
     /// Show file permissions
-    #[clap(short, long, default_value = "false")]
+    #[clap(short, long, action = clap::ArgAction::SetTrue)]
     pub(crate) permissions: bool,
 
     /// Show all items
-    #[clap(short, long, default_value = "false")]
+    #[clap(short, long, action = clap::ArgAction::SetTrue)]
     pub(crate) all: bool,
 }
