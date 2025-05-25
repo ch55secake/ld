@@ -1,22 +1,25 @@
 mod args;
 mod output;
 
+use crate::output::output_with_permissions;
 use args::Args;
 use clap::Parser;
-use lx::{DirectoryItem, find_directory_items, path_to_str};
+use lx::{DirectoryItem, find_directory_items};
 use output::output;
 
 fn main() {
     let args = Args::parse();
 
-    let path: &std::path::Path = path_to_str(&args.directory);
-    let dir_items: Vec<DirectoryItem> = find_directory_items(path);
+    let dir_items: Vec<DirectoryItem> = find_directory_items(&args.directory);
 
-    let filter = if args.all { show_all } else { hide_hidden };
+    let output = match args {
+        args if args.all && args.permissions => output_with_permissions(&dir_items, show_all),
+        args if args.all => output(&dir_items, show_all),
+        args if args.permissions => output_with_permissions(&dir_items, hide_hidden),
+        _ => output(&dir_items, hide_hidden),
+    };
 
-    let colourised_output: String = output(&dir_items, filter);
-
-    println!("{}", colourised_output);
+    println!("{}", output);
 }
 
 /// Include all items in output including hidden files
