@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, NaiveDate, Utc};
+use chrono::{DateTime, Local, NaiveDate};
 use derive_builder::Builder;
 use std::ffi::OsString;
 use std::os::unix::fs::PermissionsExt;
@@ -20,7 +20,7 @@ pub struct DirectoryItem {
     pub file_permissions: String,
 
     /// Time when file was created
-    pub created_at: SystemTime,
+    pub created_at: NaiveDate,
 }
 
 /// Find items within a directory and return back a vector with the directory items.
@@ -34,7 +34,7 @@ pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
             let is_dir = entry.file_type().ok()?.is_dir();
             let is_hidden = is_file_hidden(entry.file_name());
             let file_permissions = entry.metadata().ok()?.permissions().mode();
-            let created_at = entry.metadata().ok()?.created().ok()?;
+            let created_at = system_time_to_local_date(entry.metadata().ok()?.created().ok()?);
 
             DirectoryItemBuilder::default()
                 .name(name)
@@ -87,7 +87,7 @@ pub fn system_time_to_local_date(system_time: SystemTime) -> NaiveDate {
 
 #[cfg(test)]
 mod tests {
-    use crate::{DirectoryItem, find_directory_items, mode_to_rwx};
+    use crate::{DirectoryItem, find_directory_items, mode_to_rwx, system_time_to_local_date};
     use assert_fs::TempDir;
     use assert_fs::prelude::*;
     use std::fs;
@@ -123,14 +123,14 @@ mod tests {
                 is_dir: false,
                 is_hidden: false,
                 file_permissions: mode_to_rwx(file_mode),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
                 file_permissions: mode_to_rwx(dir_mode),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
         ];
 
@@ -160,7 +160,7 @@ mod tests {
             is_dir: false,
             is_hidden: true,
             file_permissions: mode_to_rwx(file_mode),
-            created_at: SystemTime::now(),
+            created_at: system_time_to_local_date(SystemTime::now()),
         }];
 
         assert_eq!(items, expected);

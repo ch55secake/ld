@@ -1,4 +1,4 @@
-use lx::{DirectoryItem, system_time_to_local_date};
+use lx::DirectoryItem;
 
 const STYLE_BOLD: &str = "\x1b[1m";
 const COLOUR_PINK: &str = "\x1b[95m";
@@ -48,7 +48,7 @@ fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
     if item.is_dir {
         let permissions_output: String = format!(
             "{} {} {}{}{}{}{}",
-            system_time_to_local_date(item.created_at),
+            &item.created_at,
             &item.file_permissions,
             STYLE_BOLD,
             COLOUR_PINK,
@@ -61,9 +61,7 @@ fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
     } else {
         let permissions_output: String = format!(
             "{} {} {}",
-            system_time_to_local_date(item.created_at),
-            &item.file_permissions,
-            &item.name
+            &item.created_at, &item.file_permissions, &item.name
         );
         output.push_str(&permissions_output);
         output.push_str("\n");
@@ -86,14 +84,14 @@ mod tests {
                 is_dir: false,
                 is_hidden: false,
                 file_permissions: String::from("rwxrwxrwx"),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
                 file_permissions: String::from("rwxrwxrwx"),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
         ];
 
@@ -112,7 +110,7 @@ mod tests {
             is_dir: false,
             is_hidden: true,
             file_permissions: String::from("rwxrwxrwx"),
-            created_at: SystemTime::now(),
+            created_at: system_time_to_local_date(SystemTime::now()),
         }];
 
         let expected = "";
@@ -128,14 +126,14 @@ mod tests {
                 is_dir: false,
                 is_hidden: true,
                 file_permissions: String::from("rwxrwxrwx"),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
                 file_permissions: String::from("rwxrwxrwx"),
-                created_at: SystemTime::now(),
+                created_at: system_time_to_local_date(SystemTime::now()),
             },
         ];
 
