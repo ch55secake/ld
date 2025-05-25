@@ -23,3 +23,27 @@ pub fn output(items: &Vec<DirectoryItem>) -> String {
     });
     output
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::output::output;
+    use ld::DirectoryItem;
+
+    #[test]
+    fn test_output() {
+        let items = vec![
+            DirectoryItem {
+                name: "testfile.txt".to_string(),
+                is_dir: false,
+            },
+            DirectoryItem {
+                name: "subdir".to_string(),
+                is_dir: true,
+            },
+        ];
+
+        let expected = "testfile.txt \u{1b}[1m\u{1b}[95msubdir\u{1b}[0m\u{1b}[39m ";
+
+        assert_eq!(output(&items), expected);
+    }
+}
