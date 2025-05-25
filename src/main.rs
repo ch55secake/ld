@@ -4,7 +4,7 @@ mod output;
 use crate::output::output_with_permissions;
 use args::Args;
 use clap::Parser;
-use ld::{DirectoryItem, find_directory_items};
+use lx::{DirectoryItem, find_directory_items};
 use output::output;
 
 fn main() {
