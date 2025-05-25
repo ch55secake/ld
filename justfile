@@ -3,6 +3,11 @@ alias cc := clean
 alias c := check
 alias cb := cbuild
 alias f := fmt
+alias t := test
+
+# Run tests in project
+test:
+    cargo test
 
 # Run dev build and check rust files
 build:
