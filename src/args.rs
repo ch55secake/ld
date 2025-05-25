@@ -1,7 +1,10 @@
 use clap::Parser;
 
 #[derive(Parser, Debug)]
-#[command(version, about = "List files and directories within a directory.")]
+#[command(
+    version,
+    about = "\x1b[1m\x1b[95mList files and directories within a directory.\x1b[0m\x1b[39m"
+)]
 pub(crate) struct Args {
     /// Name of the directory
     #[clap(default_value = ".")]

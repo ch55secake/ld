@@ -3,16 +3,18 @@ mod output;
 
 use args::Args;
 use clap::Parser;
-use ld::{DirectoryItem, find_directory_items, path_to_str};
+use ld::{DirectoryItem, find_directory_items};
 use output::output;
 
 fn main() {
     let args = Args::parse();
 
-    let path: &std::path::Path = path_to_str(&args.directory);
-    let dir_items: Vec<DirectoryItem> = find_directory_items(path);
+    let dir_items: Vec<DirectoryItem> = find_directory_items(&args.directory);
 
-    let filter = if args.all { show_all } else { hide_hidden };
+    let filter = match args {
+        args if args.all => show_all,
+        _ => hide_hidden,
+    };
 
     let colourised_output: String = output(&dir_items, filter);
 

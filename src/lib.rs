@@ -1,6 +1,7 @@
 use derive_builder::Builder;
 use std::ffi::OsString;
-use std::fs;
+use std::os::unix::fs::PermissionsExt;
+use std::{fs, path};
 
 #[derive(Builder, Debug, PartialEq)]
 pub struct DirectoryItem {
@@ -12,43 +13,73 @@ pub struct DirectoryItem {
 
     /// Is item hidden within the directory
     pub is_hidden: bool,
+
+    /// File permissions represented as a num
+    pub file_permissions: String,
 }
 
 /// Find items within a directory and return back a vector with the directory items.
-pub fn find_directory_items(directory: &std::path::Path) -> Vec<DirectoryItem> {
+pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
+    let directory = path::Path::new(directory);
     let entries = fs::read_dir(directory).unwrap();
 
-    let mut items: Vec<DirectoryItem> = vec![];
+    entries
+        .flatten()
+        .filter_map(|entry| {
+            let name = entry.file_name().to_str()?.to_owned();
+            let is_dir = entry.file_type().ok()?.is_dir();
+            let is_hidden = is_file_hidden(entry.file_name());
+            let file_permissions = entry.metadata().ok()?.permissions().mode();
 
-    entries.flatten().for_each(|entry| {
-        let dir_item = DirectoryItemBuilder::default()
-            .name(entry.file_name().to_str().unwrap().to_owned())
-            .is_dir(entry.file_type().unwrap().to_owned().is_dir())
-            .is_hidden(is_file_hidden(entry.file_name()))
-            .build();
-
-        items.push(dir_item.unwrap())
-    });
-
-    items
-}
-
-/// Convert a string to a path object
-pub fn path_to_str(path: &String) -> &std::path::Path {
-    std::path::Path::new(path)
+            DirectoryItemBuilder::default()
+                .name(name)
+                .is_dir(is_dir)
+                .is_hidden(is_hidden)
+                .file_permissions(mode_to_rwx(file_permissions))
+                .build()
+                .ok()
+        })
+        .collect()
 }
 
 /// Check if a file or directory is hidden
 fn is_file_hidden(file_name: OsString) -> bool {
-    file_name.to_str().unwrap().starts_with(".")
+    file_name
+        .to_str()
+        .map(|s| s.starts_with("."))
+        .unwrap_or(false)
+}
+
+/// Convert unix mode bits into rwx, split into 3 categories of user, group and others
+fn mode_to_rwx(mode: u32) -> String {
+    let mut perms = String::with_capacity(9);
+
+    let flags = [
+        (0o400, 'r'),
+        (0o200, 'w'),
+        (0o100, 'x'), // User
+        (0o040, 'r'),
+        (0o020, 'w'),
+        (0o010, 'x'), // Group
+        (0o004, 'r'),
+        (0o002, 'w'),
+        (0o001, 'x'), // Others
+    ];
+
+    for &(bit, ch) in &flags {
+        perms.push(if mode & bit != 0 { ch } else { '-' });
+    }
+
+    perms
 }
 
 #[cfg(test)]
 mod tests {
-
-    use crate::{DirectoryItem, find_directory_items};
+    use crate::{DirectoryItem, find_directory_items, mode_to_rwx};
     use assert_fs::TempDir;
     use assert_fs::prelude::*;
+    use std::fs;
+    use std::os::unix::fs::PermissionsExt;
 
     #[test]
     fn test_find_directory_items_with_static_dir() {
@@ -57,7 +88,17 @@ mod tests {
         temp.child("file.txt").touch().unwrap();
         temp.child("subdir").create_dir_all().unwrap();
 
-        let mut items = find_directory_items(temp.path());
+        let file_metadata = fs::metadata(temp.child("file.txt").path()).unwrap();
+        let dir_metadata = fs::metadata(temp.child("subdir").path()).unwrap();
+
+        let file_permissions = file_metadata.permissions();
+        let dir_permissions = dir_metadata.permissions();
+
+        let file_mode = file_permissions.mode();
+        let dir_mode = dir_permissions.mode();
+
+        let path_as_str = &temp.path().to_str().unwrap().to_owned();
+        let mut items = find_directory_items(path_as_str);
 
         items.sort_by(|a, b| a.name.cmp(&b.name));
 
@@ -68,11 +109,13 @@ mod tests {
                 name: "file.txt".to_string(),
                 is_dir: false,
                 is_hidden: false,
+                file_permissions: mode_to_rwx(file_mode),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
+                file_permissions: mode_to_rwx(dir_mode),
             },
         ];
 
@@ -84,7 +127,14 @@ mod tests {
         let temp = TempDir::new().unwrap();
         temp.child(".file.txt").touch().unwrap();
 
-        let mut items = find_directory_items(temp.path());
+        let path_as_str = &temp.path().to_str().unwrap().to_owned();
+        let mut items = find_directory_items(path_as_str);
+
+        let file_metadata = fs::metadata(temp.child(".file.txt").path()).unwrap();
+
+        let file_permissions = file_metadata.permissions();
+
+        let file_mode = file_permissions.mode();
 
         items.sort_by(|a, b| a.name.cmp(&b.name));
 
@@ -94,6 +144,7 @@ mod tests {
             name: ".file.txt".to_string(),
             is_dir: false,
             is_hidden: true,
+            file_permissions: mode_to_rwx(file_mode),
         }];
 
         assert_eq!(items, expected);

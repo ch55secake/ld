@@ -44,11 +44,13 @@ mod tests {
                 name: "testfile.txt".to_string(),
                 is_dir: false,
                 is_hidden: false,
+                file_permissions: String::from("rwxrwxrwx"),
             },
             DirectoryItem {
                 name: "subdir".to_string(),
                 is_dir: true,
                 is_hidden: false,
+                file_permissions: String::from("rwxrwxrwx"),
             },
         ];
 
@@ -63,6 +65,7 @@ mod tests {
             name: ".DS_Store".to_string(),
             is_dir: false,
             is_hidden: true,
+            file_permissions: String::from("rwxrwxrwx"),
         }];
 
         let expected = "";
