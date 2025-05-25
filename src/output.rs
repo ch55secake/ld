@@ -1,4 +1,4 @@
-use ld::DirectoryItem;
+use lx::DirectoryItem;
 
 const STYLE_BOLD: &str = "\x1b[1m";
 const COLOUR_PINK: &str = "\x1b[95m";
@@ -35,7 +35,7 @@ fn create_dir_output(output: &mut String, item: &&DirectoryItem) {
 #[cfg(test)]
 mod tests {
     use crate::output::output;
-    use ld::DirectoryItem;
+    use lx::DirectoryItem;
 
     #[test]
     fn test_output() {

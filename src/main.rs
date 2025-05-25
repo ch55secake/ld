@@ -3,7 +3,7 @@ mod output;
 
 use args::Args;
 use clap::Parser;
-use ld::{DirectoryItem, find_directory_items, path_to_str};
+use lx::{DirectoryItem, find_directory_items, path_to_str};
 use output::output;
 
 fn main() {
