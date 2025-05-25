@@ -12,21 +12,11 @@ fn main() {
 
     let dir_items: Vec<DirectoryItem> = find_directory_items(&args.directory);
 
-    // let output = match args {
-    //     args if args.all => output(&dir_items, show_all),
-    //     args if args.permissions => output_with_permissions(&dir_items, hide_hidden),
-    //     args if args.all && args.permissions => output_with_permissions(&dir_items, show_all),
-    //     _ => output(&dir_items, hide_hidden),
-    // };
-
-    let output = if args.all && args.permissions {
-        output_with_permissions(&dir_items, show_all)
-    } else if args.all {
-        output(&dir_items, show_all)
-    } else if args.permissions {
-        output_with_permissions(&dir_items, hide_hidden)
-    } else {
-        output(&dir_items, hide_hidden)
+    let output = match args {
+        args if args.all && args.permissions => output_with_permissions(&dir_items, show_all),
+        args if args.all => output(&dir_items, show_all),
+        args if args.permissions => output_with_permissions(&dir_items, hide_hidden),
+        _ => output(&dir_items, hide_hidden),
     };
 
     println!("{}", output);

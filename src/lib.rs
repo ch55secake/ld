@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, NaiveDate};
+use chrono::{DateTime, Local, NaiveDate, Utc};
 use derive_builder::Builder;
 use std::ffi::OsString;
 use std::os::unix::fs::PermissionsExt;
@@ -27,7 +27,6 @@ pub struct DirectoryItem {
 pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
     let directory = path::Path::new(directory);
     let entries = fs::read_dir(directory).unwrap();
-
     entries
         .flatten()
         .filter_map(|entry| {
@@ -83,7 +82,7 @@ fn mode_to_rwx(mode: u32) -> String {
 /// Convert system time into a local date
 pub fn system_time_to_local_date(system_time: SystemTime) -> NaiveDate {
     let datetime: DateTime<Local> = system_time.into();
-    datetime.date_naive() // Returns NaiveDate
+    datetime.date_naive()
 }
 
 #[cfg(test)]
