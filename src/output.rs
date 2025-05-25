@@ -67,6 +67,6 @@ mod tests {
 
         let expected = "";
 
-        assert_eq!(output(&items, |item| item.is_hidden), expected);
+        assert_eq!(output(&items, |item| !item.is_hidden), expected);
     }
 }
