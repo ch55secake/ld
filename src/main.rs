@@ -12,6 +12,19 @@ fn main() {
     let path: &std::path::Path = path_to_str(&args.directory);
     let dir_items: Vec<DirectoryItem> = find_directory_items(path);
 
-    let colourised_output: String = output(&dir_items);
+    let filter = if args.all { show_all } else { hide_hidden };
+
+    let colourised_output: String = output(&dir_items, filter);
+
     println!("{}", colourised_output);
+}
+
+/// Include all items in output including hidden files
+fn show_all(_: &DirectoryItem) -> bool {
+    true
+}
+
+/// Remove hidden files from the output
+fn hide_hidden(item: &DirectoryItem) -> bool {
+    !item.is_hidden
 }
