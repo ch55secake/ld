@@ -1,4 +1,4 @@
-# ld 
+# lx
 
 An `ls` clone written in Rust, mostly done so that I can learn Rust. 
 
