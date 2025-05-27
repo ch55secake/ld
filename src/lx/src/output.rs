@@ -1,4 +1,4 @@
-use lx::DirectoryItem;
+use lx_lib::DirectoryItem;
 
 const STYLE_BOLD: &str = "\x1b[1m";
 const COLOUR_PINK: &str = "\x1b[95m";
@@ -16,7 +16,7 @@ where
             create_dir_output(&mut output, &item);
         } else {
             output.push_str(&item.name);
-            output.push_str(" ");
+            output.push(' ');
         }
     });
     output
@@ -40,7 +40,7 @@ fn create_dir_output(output: &mut String, item: &&DirectoryItem) {
         STYLE_BOLD, COLOUR_PINK, &item.name, STYLE_RESET, COLOUR_RESET
     );
     output.push_str(&dir_output);
-    output.push_str(" ");
+    output.push(' ');
 }
 
 /// Create permissions and default dir output
@@ -57,14 +57,14 @@ fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
             COLOUR_RESET
         );
         output.push_str(&permissions_output);
-        output.push_str("\n");
+        output.push('\n');
     } else {
         let permissions_output: String = format!(
             "{} {} {}",
             &item.created_at, &item.file_permissions, &item.name
         );
         output.push_str(&permissions_output);
-        output.push_str("\n");
+        output.push('\n');
     }
 }
 
@@ -73,7 +73,7 @@ mod tests {
     use crate::output::{
         COLOUR_PINK, COLOUR_RESET, STYLE_BOLD, STYLE_RESET, output, output_with_permissions,
     };
-    use lx::{DirectoryItem, system_time_to_local_date};
+    use lx_lib::{DirectoryItem, system_time_to_local_date};
     use std::time::SystemTime;
 
     #[test]
