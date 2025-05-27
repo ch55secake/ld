@@ -9,21 +9,25 @@ alias t := test
 test:
     cargo test
 
+# Lint with clippy
+lint:
+    cargo clippy --
+
 # Run dev build and check rust files
 build:
-    cargo build
+    cargo build --workspace
     just check
 
 # Run clean and then dev build and check rust files
 cbuild:
     just clean
-    cargo build
+    cargo build --workspace
     just check
 
 # Clean and build optimized release binary
 build_release:
     just clean
-    cargo build --release
+    cargo build --workspace --release
 
 # Format any rust code in the project
 fmt:

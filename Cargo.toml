@@ -1,14 +1,6 @@
-[package]
-name = "lx"
-version = "0.1.0"
-edition = "2024"
-description = "List files and directories in a directory"
-readme = "README.md"
-
-[dependencies]
-clap = { version = "4.5.38", features = ["derive"] }
-derive_builder = { version = "0.20.2"}
-chrono = { version = "0.4.41" }
-
-[dev-dependencies]
-assert_fs = { version = "1.1.3" }
+[workspace]
+resolver = "3"
+members = [
+    "src/lx",
+    "src/lx-lib"
+]

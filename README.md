@@ -14,7 +14,7 @@ installed run:
 
 ```bash
 cargo clean 
-cargo build 
+cargo build --workspace
 ```
 
 If you have `just` installed run, this will run, `clean`, `build` and `check`: 
