@@ -1,8 +1,9 @@
-use chrono::{DateTime, Local, NaiveDate};
+pub mod utils;
+
+pub use crate::utils::{is_file_hidden, mode_to_rwx, system_time_to_local_date};
+use chrono::NaiveDate;
 use derive_builder::Builder;
-use std::ffi::OsString;
 use std::os::unix::fs::PermissionsExt;
-use std::time::SystemTime;
 use std::{fs, path};
 
 #[derive(Builder, Debug, PartialEq)]
@@ -21,6 +22,9 @@ pub struct DirectoryItem {
 
     /// Time when file was created
     pub created_at: NaiveDate,
+
+    /// Total file size
+    pub size: u64,
 }
 
 /// Find items within a directory and return back a vector with the directory items.
@@ -34,6 +38,7 @@ pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
             let is_dir = entry.file_type().ok()?.is_dir();
             let is_hidden = is_file_hidden(entry.file_name());
             let file_permissions = entry.metadata().ok()?.permissions().mode();
+            let size = entry.metadata().ok()?.len();
             let created_at = system_time_to_local_date(entry.metadata().ok()?.created().ok()?);
 
             DirectoryItemBuilder::default()
@@ -41,6 +46,7 @@ pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
                 .is_dir(is_dir)
                 .is_hidden(is_hidden)
                 .file_permissions(mode_to_rwx(file_permissions))
+                .size(size)
                 .created_at(created_at)
                 .build()
                 .ok()
@@ -48,46 +54,10 @@ pub fn find_directory_items(directory: &String) -> Vec<DirectoryItem> {
         .collect()
 }
 
-/// Check if a file or directory is hidden
-fn is_file_hidden(file_name: OsString) -> bool {
-    file_name
-        .to_str()
-        .map(|s| s.starts_with("."))
-        .unwrap_or(false)
-}
-
-/// Convert unix mode bits into rwx, split into 3 categories of user, group and others
-fn mode_to_rwx(mode: u32) -> String {
-    let mut perms = String::with_capacity(9);
-
-    let flags = [
-        (0o400, 'r'),
-        (0o200, 'w'),
-        (0o100, 'x'), // User
-        (0o040, 'r'),
-        (0o020, 'w'),
-        (0o010, 'x'), // Group
-        (0o004, 'r'),
-        (0o002, 'w'),
-        (0o001, 'x'), // Others
-    ];
-
-    for &(bit, ch) in &flags {
-        perms.push(if mode & bit != 0 { ch } else { '-' });
-    }
-
-    perms
-}
-
-/// Convert system time into a local date
-pub fn system_time_to_local_date(system_time: SystemTime) -> NaiveDate {
-    let datetime: DateTime<Local> = system_time.into();
-    datetime.date_naive()
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{DirectoryItem, find_directory_items, mode_to_rwx, system_time_to_local_date};
+    use crate::utils::{mode_to_rwx, system_time_to_local_date};
+    use crate::{DirectoryItem, find_directory_items};
     use assert_fs::TempDir;
     use assert_fs::prelude::*;
     use std::fs;
@@ -124,6 +94,7 @@ mod tests {
                 is_hidden: false,
                 file_permissions: mode_to_rwx(file_mode),
                 created_at: system_time_to_local_date(SystemTime::now()),
+                size: 0,
             },
             DirectoryItem {
                 name: "subdir".to_string(),
@@ -131,6 +102,7 @@ mod tests {
                 is_hidden: false,
                 file_permissions: mode_to_rwx(dir_mode),
                 created_at: system_time_to_local_date(SystemTime::now()),
+                size: 0,
             },
         ];
 
@@ -161,6 +133,7 @@ mod tests {
             is_hidden: true,
             file_permissions: mode_to_rwx(file_mode),
             created_at: system_time_to_local_date(SystemTime::now()),
+            size: 0,
         }];
 
         assert_eq!(items, expected);
