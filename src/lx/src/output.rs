@@ -80,19 +80,13 @@ fn create_dir_output(output: &mut Vec<String>, item: &&DirectoryItem) {
 fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
     if item.is_dir {
         let permissions_output: String = format!(
-            "{}{}{:<10}{}{} {}{:<10}{} {}{:>8}{} {}{}{:<30}{}{}",
+            "{}{}{:<10}{} {:<10} {:>8} {}{:<30}{}{}",
             STYLE_BOLD,
             COLOUR_CYAN,
             &item.created_at,
             COLOUR_RESET,
-            STYLE_RESET,
-            STYLE_BOLD,
             &item.file_permissions,
-            STYLE_RESET,
-            STYLE_BOLD,
             byte_conv(item.size),
-            STYLE_RESET,
-            STYLE_BOLD,
             COLOUR_PINK,
             &item.name,
             STYLE_RESET,
@@ -102,15 +96,12 @@ fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
         output.push('\n');
     } else {
         let permissions_output: String = format!(
-            "{}{}{:<10}{}{} {}{:<10}{} {}{:>8}{} {:<30}",
+            "{}{}{:<10} {}{:<10} {}{:>8}{} {:<30}",
             STYLE_BOLD,
             COLOUR_CYAN,
             &item.created_at,
             COLOUR_RESET,
-            STYLE_RESET,
-            STYLE_BOLD,
             &item.file_permissions,
-            STYLE_RESET,
             STYLE_BOLD,
             byte_conv(item.size),
             STYLE_RESET,
