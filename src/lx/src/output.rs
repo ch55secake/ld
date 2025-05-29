@@ -1,6 +1,5 @@
 use lx_lib::utils::byte_conv;
 use lx_lib::{DirectoryItem, utils};
-use regex::Regex;
 
 const STYLE_BOLD: &str = "\x1b[1m";
 const COLOUR_PINK: &str = "\x1b[95m";
