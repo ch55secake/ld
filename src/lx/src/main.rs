@@ -10,12 +10,12 @@ use output::output;
 fn main() {
     let args = Args::parse();
 
-    let dir_items: Vec<DirectoryItem> = find_directory_items(&args.directory);
+    let mut dir_items: Vec<DirectoryItem> = find_directory_items(&args.directory);
 
     let output = match args {
-        args if args.all && args.permissions => output_with_permissions(&dir_items, show_all),
+        args if args.all && args.permissions => output_with_permissions(&mut dir_items, show_all),
         args if args.all => output(&dir_items, show_all),
-        args if args.permissions => output_with_permissions(&dir_items, hide_hidden),
+        args if args.permissions => output_with_permissions(&mut dir_items, hide_hidden),
         _ => output(&dir_items, hide_hidden),
     };
 
