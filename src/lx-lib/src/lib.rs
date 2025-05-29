@@ -102,7 +102,7 @@ mod tests {
                 is_hidden: false,
                 file_permissions: mode_to_rwx(dir_mode),
                 created_at: system_time_to_local_date(SystemTime::now()),
-                size: 0,
+                size: 64,
             },
         ];
 
