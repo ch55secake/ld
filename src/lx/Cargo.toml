@@ -6,3 +6,6 @@ edition = "2024"
 [dependencies]
 clap = { version = "4.5.38", features = ["derive"] }
 lx-lib = { path = "../lx-lib" }
+
+[dev-dependencies]
+regex = { version = "1.11.1" }
