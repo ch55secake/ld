@@ -23,43 +23,39 @@ where
 
     let mut str_out = String::new();
     let terminal_width = utils::get_terminal_width().unwrap_or(80);
-    // let terminal_width = 142;
-    let max_entry_len = output.iter().map(|s| s.len()).max().unwrap_or(0);
-    let col_width = max_entry_len + 2;
+    let max_entry_len = output
+        .iter()
+        .map(|s| clean_styling(s).len())
+        .max()
+        .unwrap_or(0);
+    let col_width = max_entry_len;
     let cols = terminal_width / col_width;
 
-    // println!("{}", output.join(""));
-    //
-    // println!(
-    //     "terminal width: {}\nmax_entry_len: {}\ncol_width: {}\ncols {}",
-    //     terminal_width, max_entry_len, col_width, cols
-    // );
+    output.sort_by(|left, right| right.contains(STYLE_BOLD).cmp(&left.contains(STYLE_BOLD)));
 
-    output.sort_by(|right, left| left.contains(STYLE_BOLD).cmp(&right.contains(STYLE_BOLD)));
+    for (i, (styled_item, clean_item)) in output
+        .iter()
+        .map(|s| (s.clone(), clean_styling(s))) // Keep both styled and clean versions
+        .enumerate()
+    {
+        let clean_len = clean_item.len();
+        let padding_needed = if clean_len < col_width {
+            col_width - clean_len
+        } else {
+            0
+        };
 
-    for (i, item) in output.iter().enumerate() {
-        str_out.push_str(
-            format!("{:<width$}", item, width = col_width)
-                .to_string()
-                .as_str(),
-        );
+        str_out.push_str(&styled_item);
+        str_out.push_str(&" ".repeat(padding_needed));
+
         if (i + 1) % cols == 0 {
-            // println!("{}", (i + 1) % cols == 0);
             str_out.push('\n');
         }
     }
     if output.len() % cols != 0 {
-        // println!("{}", output.len() % cols != 0);
         str_out.push('\n');
     }
-    let pattern = format!(r"\s{{{},}}", max_entry_len - cols - 2);
-    let re = Regex::new(&pattern).unwrap();
 
-    // println!("max_entry_len - cols: {}", max_entry_len - cols);
-    // println!("matching: {}", re.is_match(&str_out));
-    str_out = re
-        .replace_all(&str_out, format!("{:width$}", "", width = cols))
-        .to_string();
     str_out.trim_end().to_string()
 }
 
