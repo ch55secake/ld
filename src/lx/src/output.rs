@@ -3,6 +3,7 @@ use lx_lib::{DirectoryItem, utils};
 
 const STYLE_BOLD: &str = "\x1b[1m";
 const COLOUR_PINK: &str = "\x1b[95m";
+const COLOUR_CYAN: &str = "\x1b[36m";
 const STYLE_RESET: &str = "\x1b[0m";
 const COLOUR_RESET: &str = "\x1b[39m";
 
@@ -54,11 +55,12 @@ where
     str_out
 }
 
-pub fn output_with_permissions<F>(items: &[DirectoryItem], filter: F) -> String
+pub fn output_with_permissions<F>(items: &mut Vec<DirectoryItem>, filter: F) -> String
 where
     F: Fn(&DirectoryItem) -> bool,
 {
     let mut output = String::new();
+    items.sort_by(|left, right| right.is_dir.cmp(&left.is_dir));
     items.iter().filter(|item| filter(item)).for_each(|item| {
         create_permissions_output(&mut output, &item);
     });
@@ -78,10 +80,18 @@ fn create_dir_output(output: &mut Vec<String>, item: &&DirectoryItem) {
 fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
     if item.is_dir {
         let permissions_output: String = format!(
-            "{:<10} {:<10} {:>8} {}{}{:<30}{}{}",
+            "{}{}{:<10}{}{} {}{:<10}{} {}{:>8}{} {}{}{:<30}{}{}",
+            STYLE_BOLD,
+            COLOUR_CYAN,
             &item.created_at,
+            COLOUR_RESET,
+            STYLE_RESET,
+            STYLE_BOLD,
             &item.file_permissions,
+            STYLE_RESET,
+            STYLE_BOLD,
             byte_conv(item.size),
+            STYLE_RESET,
             STYLE_BOLD,
             COLOUR_PINK,
             &item.name,
@@ -92,10 +102,18 @@ fn create_permissions_output(output: &mut String, item: &&DirectoryItem) {
         output.push('\n');
     } else {
         let permissions_output: String = format!(
-            "{:<10} {:<10} {:>8} {:<30}",
+            "{}{}{:<10}{}{} {}{:<10}{} {}{:>8}{} {:<30}",
+            STYLE_BOLD,
+            COLOUR_CYAN,
             &item.created_at,
+            COLOUR_RESET,
+            STYLE_RESET,
+            STYLE_BOLD,
             &item.file_permissions,
+            STYLE_RESET,
+            STYLE_BOLD,
             byte_conv(item.size),
+            STYLE_RESET,
             &item.name
         );
         output.push_str(&permissions_output);
@@ -113,9 +131,7 @@ fn clean_styling(s: &String) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::output::{
-        COLOUR_PINK, COLOUR_RESET, STYLE_BOLD, STYLE_RESET, output, output_with_permissions,
-    };
+    use crate::output::output;
     use lx_lib::{DirectoryItem, system_time_to_local_date};
     use regex::Regex;
     use std::time::SystemTime;
