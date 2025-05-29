@@ -23,19 +23,18 @@ where
 
     let mut str_out = String::new();
     let terminal_width = utils::get_terminal_width().unwrap_or(80);
-    let max_entry_len = output
+    let col_width = output
         .iter()
         .map(|s| clean_styling(s).len())
         .max()
         .unwrap_or(0);
-    let col_width = max_entry_len;
     let cols = terminal_width / col_width;
 
     output.sort_by(|left, right| right.contains(STYLE_BOLD).cmp(&left.contains(STYLE_BOLD)));
 
     for (i, (styled_item, clean_item)) in output
         .iter()
-        .map(|s| (s.clone(), clean_styling(s))) // Keep both styled and clean versions
+        .map(|s| (s.clone(), clean_styling(s)))
         .enumerate()
     {
         let clean_len = clean_item.len();
@@ -52,11 +51,8 @@ where
             str_out.push('\n');
         }
     }
-    if output.len() % cols != 0 {
-        str_out.push('\n');
-    }
 
-    str_out.trim_end().to_string()
+    str_out
 }
 
 pub fn output_with_permissions<F>(items: &[DirectoryItem], filter: F) -> String
