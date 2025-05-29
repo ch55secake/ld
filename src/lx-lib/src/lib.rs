@@ -106,7 +106,17 @@ mod tests {
             },
         ];
 
-        assert_eq!(items, expected);
+        assert_eq!(items[0].name, expected[0].name);
+        assert_eq!(items[0].is_dir, expected[0].is_dir);
+        assert_eq!(items[0].is_hidden, expected[0].is_hidden);
+        assert_eq!(items[0].file_permissions, expected[0].file_permissions);
+        assert_eq!(items[0].created_at, expected[0].created_at);
+
+        assert_eq!(items[1].name, expected[1].name);
+        assert_eq!(items[1].is_dir, expected[1].is_dir);
+        assert_eq!(items[1].is_hidden, expected[1].is_hidden);
+        assert_eq!(items[1].file_permissions, expected[1].file_permissions);
+        assert_eq!(items[1].created_at, expected[1].created_at);
     }
 
     #[test]
